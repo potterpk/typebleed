@@ -13,9 +13,6 @@ class Overlap:
 
 
 def classify_overlap(a: ParseResult, b: ParseResult) -> Overlap | None:
-    a_range = range(a.start, a.end)
-    b_range = range(b.start, b.end)
-
     overlap_start = max(a.start, b.start)
     overlap_end = min(a.end, b.end)
 
