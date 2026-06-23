@@ -1,0 +1,2 @@
+[console_scripts]
+typebleed = typebleed.cli:main

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "typebleed"
+version = "0.1.0"
+description = "Static analysis tool that detects polyglot files used to bypass file upload validators and WAF filters"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1",
+    "rich>=13.0",
+]
+
+[project.scripts]
+typebleed = "typebleed.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["typebleed*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
