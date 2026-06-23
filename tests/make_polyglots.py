@@ -2,7 +2,9 @@
 Generates test polyglot files in tests/polyglots/.
 Run once: python tests/make_polyglots.py
 """
+import io
 import struct
+import zipfile
 import zlib
 from pathlib import Path
 
@@ -26,25 +28,11 @@ def _minimal_png() -> bytes:
     return magic + ihdr + idat + iend
 
 
-def _minimal_zip(filename: str = "payload.txt", content: bytes = b"typebleed") -> bytes:
-    fname = filename.encode()
-    local = (
-        b"\x50\x4b\x03\x04"
-        + struct.pack("<HHHHIII", 20, 0, 0, 0, 0, len(content), len(content))
-        + struct.pack("<HH", len(fname), 0)
-        + fname
-        + content
-    )
-    central = (
-        b"\x50\x4b\x01\x02"
-        + struct.pack("<HHHHHIIIIHHHHII", 20, 20, 0, 0, 0, 0, len(content), len(content), len(fname), 0, 0, 0, 0, 0, 0)
-        + fname
-    )
-    eocd = (
-        b"\x50\x4b\x05\x06"
-        + struct.pack("<HHHHIIH", 0, 0, 1, 1, len(central), len(local), 0)
-    )
-    return local + central + eocd
+def _make_zip(filename: str = "payload.txt", content: bytes = b"typebleed") -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as zf:
+        zf.writestr(filename, content)
+    return buf.getvalue()
 
 
 def _minimal_gif() -> bytes:
@@ -58,7 +46,7 @@ def _minimal_gif() -> bytes:
 
 def make_png_zip():
     png = _minimal_png()
-    zip_data = _minimal_zip()
+    zip_data = _make_zip()
     (OUT / "png_zip.png").write_bytes(png + zip_data)
     print("[+] png_zip.png")
 
@@ -78,7 +66,7 @@ def make_jpeg_zip():
         b"\x1f\x1e\x1d\x1a\x1c\x1c $.' \",#\x1c\x1c(7),01444\x1f'9=82<.342\x1e"
         b"\xff\xd9"
     )
-    zip_data = _minimal_zip("evil.js", b"alert('xss')")
+    zip_data = _make_zip("evil.js", b"alert('xss')")
     (OUT / "jpeg_zip.jpg").write_bytes(jpeg + zip_data)
     print("[+] jpeg_zip.jpg")
 
