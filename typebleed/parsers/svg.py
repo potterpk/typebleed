@@ -6,22 +6,18 @@ class SVGParser(BaseParser):
     name = "SVG"
 
     def parse(self, data: bytes) -> ParseResult:
-        try:
-            text = data.decode("utf-8", errors="ignore")
-        except Exception:
-            return ParseResult(self.name, False)
-
-        svg_open = re.search(r"<svg[\s>]", text, re.IGNORECASE)
+        svg_open = re.search(rb"<svg[\s>]", data, re.IGNORECASE)
         if not svg_open:
             return ParseResult(self.name, False)
 
-        svg_close = text.rfind("</svg>")
+        svg_close = data.rfind(b"</svg>")
         if svg_close == -1:
             return ParseResult(self.name, False)
 
         start = svg_open.start()
-        end = svg_close + len("</svg>")
+        end = svg_close + len(b"</svg>")
 
+        text = data.decode("utf-8", errors="ignore")
         has_script = bool(re.search(r"<script", text, re.IGNORECASE))
         has_onload = bool(re.search(r"\bon\w+\s*=", text, re.IGNORECASE))
         also_html = bool(re.search(r"<html[\s>]", text, re.IGNORECASE))

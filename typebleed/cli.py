@@ -38,6 +38,8 @@ def scan(files, as_json, quiet, recursive):
 
         if as_json:
             print_json(det)
+            if det.is_polyglot:
+                found += 1
         elif det.is_polyglot:
             print_detection(det)
             found += 1
@@ -96,7 +98,6 @@ def extract(file, fmt, extract_all, out_dir, show_dd):
 
 
 def _print_dd_commands(path: Path, det) -> None:
-    data_len = path.stat().st_size
     primary = det.valid_formats[0]
     for result in det.valid_formats[1:]:
         skip = result.start

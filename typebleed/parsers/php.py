@@ -1,7 +1,7 @@
 from .base import BaseParser, ParseResult
 
 PHP_OPEN = b"<?php"
-PHP_SHORT = b"<?"
+PHP_ECHO = b"<?="
 
 
 class PHPParser(BaseParser):
@@ -10,7 +10,7 @@ class PHPParser(BaseParser):
     def parse(self, data: bytes) -> ParseResult:
         start = data.find(PHP_OPEN)
         if start == -1:
-            start = data.find(PHP_SHORT)
+            start = data.find(PHP_ECHO)
             if start == -1:
                 return ParseResult(self.name, False)
 

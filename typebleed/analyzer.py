@@ -17,7 +17,9 @@ def classify_overlap(a: ParseResult, b: ParseResult) -> Overlap | None:
     overlap_end = min(a.end, b.end)
 
     if overlap_end > overlap_start:
-        kind = "nested" if (b.start >= a.start and b.end <= a.end) else "header"
+        a_in_b = a.start >= b.start and a.end <= b.end
+        b_in_a = b.start >= a.start and b.end <= a.end
+        kind = "nested" if (a_in_b or b_in_a) else "header"
         return Overlap(
             format_a=a.format_name,
             format_b=b.format_name,
