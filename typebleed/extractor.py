@@ -1,6 +1,6 @@
 import struct
 from pathlib import Path
-from .detector import analyze
+from .detector import analyze, Detection
 from .parsers.base import ParseResult
 
 EOCD_SIG = b"\x50\x4b\x05\x06"
@@ -8,12 +8,7 @@ CENTRAL_SIG = b"\x50\x4b\x01\x02"
 LOCAL_SIG = b"\x50\x4b\x03\x04"
 
 
-def extract(path: Path, fmt: str | None, out_dir: Path | None) -> list[Path]:
-    det = analyze(path)
-
-    if not det.is_polyglot:
-        return []
-
+def extract(path: Path, det: Detection, fmt: str | None, out_dir: Path | None) -> list[Path]:
     targets: list[ParseResult] = []
 
     if fmt:

@@ -14,6 +14,14 @@ SEVERITY_COLOR = {
 }
 
 
+def _fmt_size(size: int) -> str:
+    if size >= 1024 ** 2:
+        return f"{size / 1024 ** 2:.1f} MB  ({size:,} bytes)"
+    if size >= 1024:
+        return f"{size / 1024:.1f} KB  ({size:,} bytes)"
+    return f"{size:,} bytes"
+
+
 def print_detection(det: Detection) -> None:
     if not det.is_polyglot:
         console.print(f"[green]CLEAN[/green]  {det.file}")
@@ -22,7 +30,7 @@ def print_detection(det: Detection) -> None:
     sev_color = SEVERITY_COLOR[det.highest_severity]
     console.print(f"\n[{sev_color}][!] POLYGLOT DETECTED — {det.highest_severity}[/{sev_color}]")
     console.print(f"    File : {det.file}")
-    console.print(f"    Size : {det.size:,} bytes")
+    console.print(f"    Size : {_fmt_size(det.size)}")
 
     formats = ", ".join(r.format_name for r in det.valid_formats)
     console.print(f"    Valid formats : {formats}\n")
@@ -56,10 +64,14 @@ def _print_details(name: str, details: dict) -> None:
     active_flags = {
         "javascript": "JavaScript actions present — active content",
         "php_code_present": "PHP code detected in file body",
-        "script_tag": "SVG <script> tag — XSS vector",
+        "script_tag": "<script> tag — XSS vector",
         "event_handlers": "SVG event handlers (onload etc.) — XSS vector",
         "launch_action": "PDF /Launch action — execution risk",
         "open_action": "PDF /OpenAction — execution risk",
+        "shell_exec": "PHP shell execution (shell_exec/system/passthru) — RCE risk",
+        "eval": "PHP eval() — arbitrary code execution risk",
+        "base64_decode": "PHP base64_decode() — obfuscation indicator",
+        "iframe": "HTML <iframe> — content injection vector",
     }
     warnings = [msg for key, msg in active_flags.items() if details.get(key)]
     if warnings:

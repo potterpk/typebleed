@@ -68,7 +68,7 @@ def score_severity(overlap: Overlap, details_a: dict, details_b: dict) -> str:
 
     # Escalate if active content detected
     active_flags = ["javascript", "php_code_present", "script_tag", "event_handlers",
-                    "launch_action", "open_action"]
+                    "launch_action", "open_action", "shell_exec", "eval"]
     combined = {**details_a, **details_b}
     if any(combined.get(f) for f in active_flags):
         if base == "LOW":

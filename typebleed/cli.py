@@ -75,8 +75,11 @@ def extract(file, fmt, extract_all, out_dir, show_dd):
         console.print(f"[green]CLEAN[/green]  {path} — no polyglot detected, nothing to extract.")
         sys.exit(0)
 
+    if fmt and extract_all:
+        console.print("[yellow]WARNING[/yellow]  --format is ignored when --all is set.")
+
     if show_dd:
-        _print_dd_commands(path, det)
+        _print_dd_commands(path, det, fmt)
         sys.exit(0)
 
     dest = Path(out_dir) if out_dir else None
@@ -84,7 +87,7 @@ def extract(file, fmt, extract_all, out_dir, show_dd):
         dest.mkdir(parents=True, exist_ok=True)
 
     try:
-        written = do_extract(path, fmt if not extract_all else None, dest)
+        written = do_extract(path, det, fmt if not extract_all else None, dest)
     except ValueError as e:
         console.print(f"[red]ERROR[/red] {e}")
         sys.exit(2)
@@ -97,9 +100,17 @@ def extract(file, fmt, extract_all, out_dir, show_dd):
         console.print(f"[green]EXTRACTED[/green]  {out_path}")
 
 
-def _print_dd_commands(path: Path, det) -> None:
-    primary = det.valid_formats[0]
-    for result in det.valid_formats[1:]:
+def _print_dd_commands(path: Path, det, fmt: str | None) -> None:
+    if fmt:
+        targets = [r for r in det.valid_formats if r.format_name == fmt.upper()]
+        if not targets:
+            available = ", ".join(r.format_name for r in det.valid_formats)
+            console.print(f"[red]ERROR[/red]  Format {fmt.upper()!r} not detected. Found: {available}")
+            return
+    else:
+        targets = det.valid_formats[1:]
+
+    for result in targets:
         skip = result.start
         count = result.end - result.start
         suffix = result.format_name.lower()
